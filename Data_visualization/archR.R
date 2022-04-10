@@ -172,3 +172,32 @@ pal["spatial_ATAC"] <- "lightgrey"
 
 p <- ggPoint(plotProj[,1], plotProj[,2], as.vector(plotProj[,3]), rastr = TRUE, pal = pal)
 p
+
+
+## Pseudotime analysis 
+source('SpatialPlot_traj.R')
+
+trajectory <- c("Radial glia", "Postmitotic premature neurons", "Excitatory neurons")
+
+projCUTA <- addTrajectory(
+  ArchRProj = proj_in_tissue, 
+  name = "Neuron_U", 
+  groupBy = "predictedGroup_Un",
+  trajectory = trajectory, 
+  embedding = "UMAP", 
+  force = TRUE
+)
+
+meta.data.integration <- as.data.frame(getCellColData(ArchRProj = proj_in_tissue))[, c('Neuron_U'), drop=FALSE]
+new_row_names <- row.names(meta.data.integration)
+new_row_names <- unlist(lapply(new_row_names, function(x) gsub(".*#","", x)))
+new_row_names <- unlist(lapply(new_row_names, function(x) gsub("-.*","", x)))
+row.names(meta.data.integration) <- new_row_names
+all(row.names(meta.data.integration) == colnames(spatial.obj))
+
+spatial.obj <- AddMetaData(object = spatial.obj, metadata = meta.data.integration)
+
+p <- SpatialPlot_traj(spatial.obj, features = "Neuron_U",  pt.size.factor = 4, image.alpha = 0, stroke = 0) + 
+  theme(legend.position = "right", legend.text=element_text(size=15), legend.title=element_text(size=15))
+p$layers[[1]]$aes_params <- c(p$layers[[1]]$aes_params, shape=22)
+p
