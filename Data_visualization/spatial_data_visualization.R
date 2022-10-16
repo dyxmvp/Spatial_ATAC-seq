@@ -1,4 +1,4 @@
-ibrary(ArchR)
+library(ArchR)
 library(Seurat)
 library(grid)
 library(ggplot2)
